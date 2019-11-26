@@ -130,6 +130,73 @@
       }
 
       window.requestAnimationFrame(update)
+
+      new SmoothScroll(document,120,12)
+      // https://stackoverflow.com/questions/47011055/smooth-vertical-scrolling-on-mouse-wheel-in-vanilla-javascript
+      function SmoothScroll(target, speed, smooth) {
+        if (target === document)
+          target = (document.scrollingElement
+                    || document.documentElement
+                    || document.body.parentNode
+                    || document.body) // cross browser support for document scrolling
+
+        var moving = false
+        var pos = target.scrollTop
+        var frame = target === document.body
+                    && document.documentElement
+                    ? document.documentElement
+                    : target // safari is the new IE
+
+        target.addEventListener('mousewheel', scrolled, { passive: false })
+        target.addEventListener('DOMMouseScroll', scrolled, { passive: false })
+
+        function scrolled(e) {
+          e.preventDefault(); // disable default scrolling
+
+          var delta = normalizeWheelDelta(e)
+
+          pos += -delta * speed
+          pos = Math.max(0, Math.min(pos, target.scrollHeight - frame.clientHeight)) // limit scrolling
+
+          if (!moving) update()
+        }
+
+        function normalizeWheelDelta(e){
+          if(e.detail){
+            if(e.wheelDelta)
+              return e.wheelDelta/e.detail/40 * (e.detail>0 ? 1 : -1) // Opera
+            else
+              return -e.detail/3 // Firefox
+          }else
+            return e.wheelDelta/120 // IE,Safari,Chrome
+        }
+
+        function update() {
+          moving = true
+
+          var delta = (pos - target.scrollTop) / smooth
+
+          target.scrollTop += delta
+
+          if (Math.abs(delta) > 0.5)
+            requestFrame(update)
+          else
+            moving = false
+        }
+
+        var requestFrame = function() { // requestAnimationFrame cross browser
+          return (
+            window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.oRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            function(func) {
+              window.setTimeout(func, 1000 / 50);
+            }
+          );
+        }()
+      }
     }
   </script>
 
@@ -140,13 +207,13 @@
   <div id="main">
     <div id="header" class="section">
 
-      <div 
+      <div
         id="stars"
         class="lax"
         data-lax-bg-pos-x="0 0, 10000 -800 | loop=10000"
       ></div>
 
-      <div 
+      <div
         id="planet1"
         class="lax"
         data-lax-translate-x="0 0, 5000 (-vw-elw)"
@@ -154,31 +221,31 @@
         data-lax-sprite-image="./img/bart.png"
       ></div>
 
-      <div 
+      <div
         id="foreground"
         class="lax"
         data-lax-bg-pos-x="0 0, 7000 (-15*vh) | loop=7000"
       ></div>
 
-      <div 
+      <div
         id="logo"
       ></div>
 
-      <div 
+      <div
         id="scrolltext"
         data-lax-translate-y="0 0, 360 350"
         class="lax"
       ></div>
 
-      <div 
+      <div
         id="nyan"
         data-lax-sprite-data="300,119,12,4,10"
         data-lax-translate-x="0 vw, 600 -elw | loop=600"
-        data-lax-sprite-image="./img/nyan.png"        
+        data-lax-sprite-image="./img/nyan.png"
         class="lax"
       ></div>
 
-      <div 
+      <div
         id="mario"
         class="lax"
         data-lax-translate-x="0 -elw, 720 (vw+elw) | loop=720"
@@ -187,7 +254,7 @@
         data-lax-sprite-image="./img/mario-sprite.png"
       ></div>
 
-      <div 
+      <div
         id="bowser"
         class="lax"
         data-lax-translate-x="0 vw, 720 -elw | loop=720"
